@@ -1,5 +1,6 @@
 {
     "host": "127.0.0.1",
     "port": "8983",
-    "protocol": "http"
+    "protocol": "http",
+    "frontend_domain": "http://localhost:8080"
 }

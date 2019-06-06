@@ -28,9 +28,9 @@ function buildFieldQuery(filters){
     return fq;
 }
 
-function buildFacetQuery(query){
+function buildFacetQuery(facet){
     let facetQuery = '';
-    if (query && query.facet=='on'){
+    if (facet=='on'){
         facetQuery  = 'facet.field=node_types&facet.field=organisms&facet.field=species_list&facet=on';
     }
     return facetQuery;

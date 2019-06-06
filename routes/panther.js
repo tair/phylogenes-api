@@ -9,19 +9,17 @@ client.options.core = 'panther';
 devDebugger('client: \n', client.options);
 
 // search function
-router.post('/search/:searchText/:start/:rows', async (req, res) => {
-    devDebugger('params: ', req.params);
+router.post('/search', async (req, res) => {
     devDebugger('body: ', JSON.stringify(req.body));
-    devDebugger('query: ', req.query);
-    const { error } = validateSearchInput({ ...req.params, fq: req.body, ...req.query });
+    const { error } = validateSearchInput(req.body);
     if (error) return res.status(400).send(error.details[0].message);
 
-    const { searchText, start, rows } = req.params
+    const { searchText, start, rows, species, organisms, facet } = req.body;
     const q = buildGeneralQuery(searchText);
-    const fq = buildFieldQuery(req.body);
-    const facet = buildFacetQuery(req.query);
+    const fq = buildFieldQuery({species, organisms});
+    const fcq = buildFacetQuery(facet);
     const query = client.query()
-        .facetQuery(facet)
+        .facetQuery(fcq)
         .fl('id,sf_names,family_name,node_types,gene_symbols,uniprot_ids')
         .rows(rows)
         .start(start)

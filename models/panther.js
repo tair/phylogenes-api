@@ -1,13 +1,11 @@
 const Joi = require('joi');
 
 const searchInputSchema = Joi.object().keys({
-  searchText: Joi.string().min(3).max(100),
+  searchText: Joi.any(),
   rows: Joi.number().required(),
   start: Joi.number().required(),
-  fq: Joi.object().keys({
-    species: Joi.array().required(),
-    organisms: Joi.array().required()
-  }),
+  species: Joi.array().required(),
+  organisms: Joi.array().required(),
   facet: Joi.string().valid(['on', 'off'])
 });
 
