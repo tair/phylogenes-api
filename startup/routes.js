@@ -5,7 +5,7 @@ const cors = require('cors');
 const config = require('config');
 
 module.exports = function(app) {
-  app.use(cors( { origin: config.get('frontend_domain') } ));
+  app.use(cors( { origin: '*'} ));
   app.use(express.json());
   app.use('/api/panther', panther);
   app.use(error);

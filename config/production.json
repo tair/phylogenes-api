@@ -1,5 +1,5 @@
 {
-    "host": "54.68.67.235",
+    "host": "localhost",
     "port": "8983",
     "protocol": "http"
 }
