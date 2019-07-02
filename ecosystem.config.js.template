@@ -1,0 +1,18 @@
+module.exports = {
+  apps: [{
+    name: "index",
+    script: "./index.js",
+    env: {
+      solr_user: "",
+      solr_password: "",
+      PORT:"",
+      NODE_ENV: "development"
+    },
+    env_production: {
+      solr_user: "",
+      solr_password: "",
+      PORT:"",
+      NODE_ENV: "production",
+    }
+  }]
+}
