@@ -7,7 +7,7 @@ require('./startup/exception')();
 require('./startup/config')();
 require('./startup/solr').ping();
 require('./startup/routes')(app);
-if (config.get('NODE_ENV')=='production'){
+if (process.env.NODE_ENV=='production'){
     require('./startup/prod')(app);
 }
 
