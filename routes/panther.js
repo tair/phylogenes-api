@@ -67,6 +67,8 @@ router.get('/ids', async (req, res) => {
 router.get('/annotations', async (req, res) => {
     const query = client.query().q('*:*').start(0).rows(10000)
         .fl('id, species_list, go_annotations');
+    const result = await client.search(query);
+    return res.status(200).send(result);
 });
 
 module.exports = router;
