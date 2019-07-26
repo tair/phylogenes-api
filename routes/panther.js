@@ -37,7 +37,7 @@ router.get('/tree/:id', async (req, res) => {
     const { error } = validateTreeInput(req.params);
     if (error) return res.status(400).send(error.details[0].message);
 
-    const query = client.query().q(req.params).start(0).rows(1).fl('family_name,speciation_events,jsonString,go_annotations');
+    const query = client.query().q(req.params).start(0).rows(1).fl('family_name,speciation_events,jsonString,go_annotations,publications');
     const result = await client.search(query);
     return res.status(200).send(result);
 });
