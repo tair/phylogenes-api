@@ -53,4 +53,15 @@ router.get('/go_annotations/:id', async (req, res) => {
     return res.status(200).send(result);
 });
 
+// get single tree msa data
+router.get('/msa/:id', async (req, res) => {
+    devDebugger('params: ', req.params);
+    const { error } = validateTreeInput(req.params);
+    if (error) return res.status(400).send(error.details[0].message);
+
+    const query = client.query().q(req.params).start(0).rows(1).fl('msa_data');
+    const result = await client.search(query);
+    return res.status(200).send(result);
+});
+
 module.exports = router;
