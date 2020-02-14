@@ -2,5 +2,7 @@
     "host": "localhost",
     "port": "8983",
     "core": "panther",
-    "protocol": "http"
+    "protocol": "http",
+    "user": "solr_user",
+    "password": "solr_password"
 }

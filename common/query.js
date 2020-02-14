@@ -30,8 +30,9 @@ function buildFieldQuery(filters){
 
 function buildFacetQuery(facet){
     let facetQuery = '';
-    if (facet=='on'){
-        facetQuery  = 'facet.field=node_types&facet.field=organisms&facet.field=species_list&facet=on';
+    if (facet == 'on') {
+        // facetQuery = 'facet.field=node_types&facet.field=organisms&facet.field=species_list&facet=on';
+        facetQuery  = 'facet.field=organisms&facet.field=species_list&facet=on';
     }
     return facetQuery;
 }
