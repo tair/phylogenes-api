@@ -23,7 +23,7 @@ function buildFieldQuery(filters) {
         fq.push(fqObj);
     }
     for (var i = 0; i < filters.species.length; i++) {
-        fqObj = { field: 'taxonomic_ranges', value: `"${filters.species[i]}"` };
+        fqObj = { field: 'taxonomic_ranges_root', value: `"${filters.species[i]}"` };
         fq.push(fqObj);
     }
     for (var i = 0; i < filters.organisms.length; i++) {
@@ -37,7 +37,7 @@ function buildFacetQuery(facet) {
     let facetQuery = '';
     if (facet == 'on') {
         // facetQuery = 'facet.field=node_types&facet.field=organisms&facet.field=species_list&facet=on';
-        facetQuery = 'facet.field=organisms&facet.field=species_list&facet.field=taxonomic_ranges&facet=on';
+        facetQuery = 'facet.field=organisms&facet.field=species_list&facet.field=taxonomic_ranges_root&facet=on';
     }
     return facetQuery;
 }
