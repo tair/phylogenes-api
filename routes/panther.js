@@ -16,7 +16,7 @@ router.post('/search', async (req, res) => {
 
     const { searchText, start, rows, species, organisms, facet } = req.body;
     const q = buildGeneralQuery(searchText);
-    const fq = buildFieldQuery({species, organisms});
+    const fq = buildFieldQuery({ species, organisms });
     const fcq = buildFacetQuery(facet);
     const query = client.query()
         .facetQuery(fcq)
@@ -49,6 +49,17 @@ router.get('/go_annotations/:id', async (req, res) => {
     if (error) return res.status(400).send(error.details[0].message);
 
     const query = client.query().q(req.params).start(0).rows(1).fl('family_name,taxonomic_ranges,go_annotations');
+    const result = await client.search(query);
+    return res.status(200).send(result);
+});
+
+//get single tree publications data
+router.get('/publications/:id', async (req, res) => {
+    devDebugger('params: ', req.params);
+    const { error } = validateTreeInput(req.params);
+    if (error) return res.status(400).send(error.details[0].message);
+
+    const query = client.query().q(req.params).start(0).rows(1).fl('family_name,publications_count');
     const result = await client.search(query);
     return res.status(200).send(result);
 });
