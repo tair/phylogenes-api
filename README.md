@@ -1,6 +1,11 @@
 # phylogenes-api
 Phylogenes REST API written in ExpressJS :lock:
 
+git fetch
+get pull origin master
+pm2 stop index.js
+pm2 start --env production
+
 ## Installation
 ```npm i```
 
