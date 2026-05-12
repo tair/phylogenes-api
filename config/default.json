@@ -6,5 +6,9 @@
   "user": "solr_user",
   "password": "solr_password",
   "treeS3Url": "https://phg-panther-data-19.s3-us-west-2.amazonaws.com/",
-  "msaS3Url": "https://phg-panther-msa-data-19.s3-us-west-2.amazonaws.com/"
+  "msaS3Url": "https://phg-panther-msa-data-19.s3-us-west-2.amazonaws.com/",
+  "orthologsS3Url": "https://phg-orthologs-17.s3-us-west-2.amazonaws.com/",
+  "paralogsS3Url": "https://phg-paralogs-17.s3-us-west-2.amazonaws.com/",
+  "orthologsDownloadS3Url": "https://phg-orthologs-download-17.s3-us-west-2.amazonaws.com/",
+  "paralogsDownloadS3Url": "https://phg-paralogs-download-17.s3-us-west-2.amazonaws.com/"
 }

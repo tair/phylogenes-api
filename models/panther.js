@@ -13,6 +13,10 @@ const treeInputSchema = Joi.object().keys({
   id: Joi.string().regex(/^PTHR[0-9]{5,}$/).error(err=>{return {message: 'Invalid tree id'}}),
 });
 
+const agiInputSchema = Joi.object().keys({
+  id: Joi.string().regex(/^AT[1-5CM]G\d{5}$/).error(err=>{return {message: 'Invalid AGI locus id'}}),
+});
+
 function validateSearchInput(queryObj) {
   return Joi.validate(queryObj, searchInputSchema);
 }
@@ -21,7 +25,12 @@ function validateTreeInput(queryObj){
   return Joi.validate(queryObj, treeInputSchema);
 }
 
+function validateAgiInput(queryObj){
+  return Joi.validate(queryObj, agiInputSchema);
+}
+
 module.exports= {
   validateSearchInput,
   validateTreeInput,
+  validateAgiInput,
 }
