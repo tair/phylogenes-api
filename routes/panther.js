@@ -11,19 +11,21 @@ const TREE_S3_BASE = config.get('treeS3Url');
 const MSA_S3_BASE = config.get('msaS3Url');
 
 function pipeS3Json(url, res) {
+    const fail = (err) => {
+        if (res.headersSent) { res.destroy(err); return; }
+        res.status(502).send({ error: err.message });
+    };
     https.get(url, (s3) => {
         if (s3.statusCode !== 200) {
             res.status(s3.statusCode).send({ error: `upstream ${s3.statusCode}` });
             s3.resume();
             return;
         }
+        s3.on('error', (err) => { devDebugger('S3 stream error: ', err.message); fail(err); });
         res.setHeader('Content-Type', 'application/json');
         res.setHeader('Cache-Control', 'public, max-age=86400');
         s3.pipe(res);
-    }).on('error', (err) => {
-        devDebugger('S3 proxy error: ', err.message);
-        res.status(502).send({ error: err.message });
-    });
+    }).on('error', (err) => { devDebugger('S3 proxy error: ', err.message); fail(err); });
 }
 
 client.options.core = 'panther';
