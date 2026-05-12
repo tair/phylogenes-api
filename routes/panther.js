@@ -1,9 +1,30 @@
 const devDebugger = require('debug')('dev');
+const https = require('https');
+const config = require('config');
 const client = require('../startup/solr');
 const { buildFieldQuery, buildGeneralQuery, buildFacetQuery } = require('../common/query');
 const { validateSearchInput, validateTreeInput } = require('../models/panther');
 const express = require('express');
 const router = express.Router();
+
+const TREE_S3_BASE = config.get('treeS3Url');
+const MSA_S3_BASE = config.get('msaS3Url');
+
+function pipeS3Json(url, res) {
+    https.get(url, (s3) => {
+        if (s3.statusCode !== 200) {
+            res.status(s3.statusCode).send({ error: `upstream ${s3.statusCode}` });
+            s3.resume();
+            return;
+        }
+        res.setHeader('Content-Type', 'application/json');
+        res.setHeader('Cache-Control', 'public, max-age=86400');
+        s3.pipe(res);
+    }).on('error', (err) => {
+        devDebugger('S3 proxy error: ', err.message);
+        res.status(502).send({ error: err.message });
+    });
+}
 
 client.options.core = 'panther';
 devDebugger('client: \n', client.options);
@@ -73,6 +94,20 @@ router.get('/msa/:id', async (req, res) => {
     const query = client.query().q(req.params).start(0).rows(1).fl('msa_data');
     const result = await client.search(query);
     return res.status(200).send(result);
+});
+
+// proxy panther tree JSON from S3 (avoids browser CORS on the bucket)
+router.get('/tree-data/:id', (req, res) => {
+    const { error } = validateTreeInput(req.params);
+    if (error) return res.status(400).send(error.details[0].message);
+    pipeS3Json(`${TREE_S3_BASE}${req.params.id}.json`, res);
+});
+
+// proxy panther MSA JSON from S3 (avoids browser CORS on the bucket)
+router.get('/msa-data/:id', (req, res) => {
+    const { error } = validateTreeInput(req.params);
+    if (error) return res.status(400).send(error.details[0].message);
+    pipeS3Json(`${MSA_S3_BASE}${req.params.id}.json`, res);
 });
 
 module.exports = router;

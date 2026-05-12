@@ -1,8 +1,10 @@
 {
-    "host": "localhost",
-    "port": "8983",
-    "core": "panther",
-    "protocol": "http",
-    "user": "solr_user",
-    "password": "solr_password"
+  "host": "54.68.67.235",
+  "port": "8983",
+  "core": "panther",
+  "protocol": "http",
+  "user": "solr_user",
+  "password": "solr_password",
+  "treeS3Url": "https://phg-panther-data-19.s3-us-west-2.amazonaws.com/",
+  "msaS3Url": "https://phg-panther-msa-data-19.s3-us-west-2.amazonaws.com/"
 }
