@@ -17,6 +17,8 @@ const PARALOGS_DL_S3_BASE = config.get('paralogsDownloadS3Url');
 function pipeS3(url, res, contentType) {
     const fail = (err) => {
         if (res.headersSent) { res.destroy(err); return; }
+        // strip the success-path Cache-Control so an error response isn't cached for 24h
+        res.removeHeader('Cache-Control');
         res.status(502).send({ error: err.message });
     };
     https.get(url, (s3) => {
