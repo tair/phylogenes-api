@@ -3,3 +3,4 @@ error.log
 logfile.log
 uncaughtexceptions.log
 ecosystem.config.js
+ecosystem.config.server.js

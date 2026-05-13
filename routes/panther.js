@@ -1,9 +1,38 @@
 const devDebugger = require('debug')('dev');
+const https = require('https');
+const config = require('config');
 const client = require('../startup/solr');
 const { buildFieldQuery, buildGeneralQuery, buildFacetQuery } = require('../common/query');
-const { validateSearchInput, validateTreeInput } = require('../models/panther');
+const { validateSearchInput, validateTreeInput, validateAgiInput } = require('../models/panther');
 const express = require('express');
 const router = express.Router();
+
+const TREE_S3_BASE = config.get('treeS3Url');
+const MSA_S3_BASE = config.get('msaS3Url');
+const ORTHOLOGS_S3_BASE = config.get('orthologsS3Url');
+const PARALOGS_S3_BASE = config.get('paralogsS3Url');
+const ORTHOLOGS_DL_S3_BASE = config.get('orthologsDownloadS3Url');
+const PARALOGS_DL_S3_BASE = config.get('paralogsDownloadS3Url');
+
+function pipeS3(url, res, contentType) {
+    const fail = (err) => {
+        if (res.headersSent) { res.destroy(err); return; }
+        // strip the success-path Cache-Control so an error response isn't cached for 24h
+        res.removeHeader('Cache-Control');
+        res.status(502).send({ error: err.message });
+    };
+    https.get(url, (s3) => {
+        if (s3.statusCode !== 200) {
+            res.status(s3.statusCode).send({ error: `upstream ${s3.statusCode}` });
+            s3.resume();
+            return;
+        }
+        s3.on('error', (err) => { devDebugger('S3 stream error: ', err.message); fail(err); });
+        res.setHeader('Content-Type', contentType);
+        res.setHeader('Cache-Control', 'public, max-age=86400');
+        s3.pipe(res);
+    }).on('error', (err) => { devDebugger('S3 proxy error: ', err.message); fail(err); });
+}
 
 client.options.core = 'panther';
 devDebugger('client: \n', client.options);
@@ -73,6 +102,48 @@ router.get('/msa/:id', async (req, res) => {
     const query = client.query().q(req.params).start(0).rows(1).fl('msa_data');
     const result = await client.search(query);
     return res.status(200).send(result);
+});
+
+// proxy panther tree JSON from S3 (avoids browser CORS on the bucket)
+router.get('/tree-data/:id', (req, res) => {
+    const { error } = validateTreeInput(req.params);
+    if (error) return res.status(400).send(error.details[0].message);
+    pipeS3(`${TREE_S3_BASE}${req.params.id}.json`, res, 'application/json');
+});
+
+// proxy panther MSA JSON from S3 (avoids browser CORS on the bucket)
+router.get('/msa-data/:id', (req, res) => {
+    const { error } = validateTreeInput(req.params);
+    if (error) return res.status(400).send(error.details[0].message);
+    pipeS3(`${MSA_S3_BASE}${req.params.id}.json`, res, 'application/json');
+});
+
+// proxy ortholog JSON for a TAIR locus (avoids browser CORS on the bucket)
+router.get('/orthologs/:id', (req, res) => {
+    const { error } = validateAgiInput(req.params);
+    if (error) return res.status(400).send(error.details[0].message);
+    pipeS3(`${ORTHOLOGS_S3_BASE}${req.params.id}.json`, res, 'application/json');
+});
+
+// proxy paralog JSON for a TAIR locus
+router.get('/paralogs/:id', (req, res) => {
+    const { error } = validateAgiInput(req.params);
+    if (error) return res.status(400).send(error.details[0].message);
+    pipeS3(`${PARALOGS_S3_BASE}${req.params.id}.json`, res, 'application/json');
+});
+
+// proxy ortholog .txt download for a TAIR locus
+router.get('/orthologs-download/:id', (req, res) => {
+    const { error } = validateAgiInput(req.params);
+    if (error) return res.status(400).send(error.details[0].message);
+    pipeS3(`${ORTHOLOGS_DL_S3_BASE}${req.params.id}_ortholog.txt`, res, 'text/plain');
+});
+
+// proxy paralog .txt download for a TAIR locus
+router.get('/paralogs-download/:id', (req, res) => {
+    const { error } = validateAgiInput(req.params);
+    if (error) return res.status(400).send(error.details[0].message);
+    pipeS3(`${PARALOGS_DL_S3_BASE}${req.params.id}_paralog.txt`, res, 'text/plain');
 });
 
 module.exports = router;
