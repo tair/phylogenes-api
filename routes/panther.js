@@ -23,7 +23,14 @@ function pipeS3(url, res, contentType) {
     };
     https.get(url, (s3) => {
         if (s3.statusCode !== 200) {
-            res.status(s3.statusCode).send({ error: `upstream ${s3.statusCode}` });
+            // The buckets are public-read without ListBucket, so S3 answers a missing
+            // key with 403, not 404. Report that as 404 so callers can tell "no file
+            // for this id" from S3 being unreachable (TAIR3-1098).
+            if (s3.statusCode === 403 || s3.statusCode === 404) {
+                res.status(404).send({ error: 'not found' });
+            } else {
+                res.status(502).send({ error: `upstream ${s3.statusCode}` });
+            }
             s3.resume();
             return;
         }
