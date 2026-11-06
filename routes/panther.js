@@ -26,6 +26,8 @@ function pipeS3(url, res, contentType) {
             // The buckets are public-read without ListBucket, so S3 answers a missing
             // key with 403, not 404. Report that as 404 so callers can tell "no file
             // for this id" from S3 being unreachable (TAIR3-1098).
+            // Log the real S3 status: a 403 can also mean access was denied.
+            devDebugger('S3 response: ', s3.statusCode, url);
             if (s3.statusCode === 403 || s3.statusCode === 404) {
                 res.status(404).send({ error: 'not found' });
             } else {
